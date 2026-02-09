@@ -1,3 +1,4 @@
+import sqlite3
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -94,3 +95,27 @@ def test_docs_and_session_endpoint():
         assert session.json()["session_id"] == "s2"
         assert session.json()["words"][0]["target_word"] == "merci"
 
+
+def test_required_schema_table_names_exist():
+    with TestClient(app):
+        pass
+
+    db_path = Path(__file__).resolve().parent.parent / "app.db"
+    conn = sqlite3.connect(db_path)
+    try:
+        table_rows = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'table'"
+        ).fetchall()
+    finally:
+        conn.close()
+
+    table_names = {row[0] for row in table_rows}
+    required_table_names = {
+        "users",
+        "vocab_items",
+        "sessions",
+        "messages",
+        "word_progress",
+        "quiz_attempts",
+    }
+    assert required_table_names.issubset(table_names)

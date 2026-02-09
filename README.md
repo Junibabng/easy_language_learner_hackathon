@@ -5,6 +5,13 @@ Minimal FastAPI + SQLite backend implementing vocab exposure, cloze locking, det
 ## Features
 - FastAPI app with OpenAPI docs at `/docs`.
 - SQLite persistence via stdlib `sqlite3` (`app.db` at repo root).
+- SQLite minimal data model tables:
+  - `users`
+  - `vocab_items`
+  - `sessions`
+  - `messages`
+  - `word_progress`
+  - `quiz_attempts`
 - Endpoints:
   - `POST /v1/vocab/bulk`
   - `POST /v1/chat`
@@ -98,4 +105,3 @@ curl http://127.0.0.1:8000/v1/session/session-1
 ```bash
 pytest -q
 ```
-

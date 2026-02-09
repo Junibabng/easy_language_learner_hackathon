@@ -61,7 +61,7 @@ def bulk_vocab(request: VocabBulkRequest):
         for item in request.words:
             cursor = conn.execute(
                 """
-                INSERT OR IGNORE INTO vocab_words(session_id, target_word, translation)
+                INSERT OR IGNORE INTO vocab_items(session_id, target_word, translation)
                 VALUES(?, ?, ?)
                 """,
                 (request.session_id, item.target_word.strip(), item.translation.strip()),
@@ -82,7 +82,7 @@ def chat(
         rows = conn.execute(
             """
             SELECT target_word, translation, exposure_count, unlocked
-            FROM vocab_words
+            FROM vocab_items
             WHERE session_id = ?
             ORDER BY id ASC
             """,
@@ -110,7 +110,7 @@ def chat(
             reply_parts.append(f"{rendered} ({row['translation']})")
             conn.execute(
                 """
-                UPDATE vocab_words
+                UPDATE vocab_items
                 SET exposure_count = ?
                 WHERE session_id = ? AND target_word = ?
                 """,
@@ -132,7 +132,7 @@ def quiz_generate(
         rows = conn.execute(
             """
             SELECT target_word, translation
-            FROM vocab_words
+            FROM vocab_items
             WHERE session_id = ?
             ORDER BY target_word ASC
             """,
@@ -179,7 +179,7 @@ def quiz_submit(
             row = conn.execute(
                 """
                 SELECT translation, unlocked
-                FROM vocab_words
+                FROM vocab_items
                 WHERE session_id = ? AND target_word = ?
                 """,
                 (request.session_id, answer.target_word),
@@ -194,7 +194,7 @@ def quiz_submit(
             if unlocked and not bool(row["unlocked"]):
                 conn.execute(
                     """
-                    UPDATE vocab_words
+                    UPDATE vocab_items
                     SET unlocked = 1
                     WHERE session_id = ? AND target_word = ?
                     """,
@@ -224,7 +224,7 @@ def get_session(id: str):
         rows = conn.execute(
             """
             SELECT target_word, translation, exposure_count, unlocked
-            FROM vocab_words
+            FROM vocab_items
             WHERE session_id = ?
             ORDER BY id ASC
             """,
@@ -241,4 +241,3 @@ def get_session(id: str):
         for r in rows
     ]
     return SessionResponse(session_id=id, words=words)
-
